@@ -7,7 +7,14 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <canvas id="gameCanvas"></canvas>
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+    <div id="gameOver" class="hidden">
+      <h2>Congratulations!</h2>
+      <p id="timeTaken"></p>
+      <button id="restartButton">Restart</button>
+    </div>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
