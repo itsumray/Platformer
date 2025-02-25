@@ -12,32 +12,37 @@ let startTime;
 
 // Player object
 const player = {
-  x: 100,
-  y: canvas.height - 150,
-  width: 40,
-  height: 40,
-  color: "blue",
-  dx: 0,
-  dy: 0,
-  speed: 5,
-  jumpPower: -15,
-  isJumping: false,
+    x: canvas.width / 2 - 20,
+    y: canvas.height - 70,
+    width: 40,
+    height: 40,
+    color: "blue",
+    dx: 0,
+    dy: 0,
+    speed: 5,
+    jumpPower: -15,
+    isJumping: false,
 };
 
 // Platforms array (multiple stages)
 const platforms = [
     { x: -10, y: canvas.height - 20, width: canvas.width + 20, height: 20 }, // Ground
-    { x: 50, y: canvas.height - 100, width: 200, height: 20 },
-    { x: 300, y: canvas.height - 200, width: 200, height: 20 },
-    { x: canvas.width - 250, y: canvas.height - 300, width: 200, height: 20 },
+    { x: canvas.width / 2 - 100, y: canvas.height - 100, width: 200, height: 20 },
 ];
 
-// Finish line
-const finishLine = { x: canvas.width - 100, y: canvas.height - 120, width: 10, height: platform[1].height };
+// Goal object at the top
+const goal = { x: canvas.width /2 -15 , y: canvas.height -300, width:30 , height :30 };
 
 // Handle keyboard input
 const keys = {};
-window.addEventListener("keydown", (e) => (keys[e.code] = true));
+window.addEventListener("keydown", (e) => {
+    keys[e.code] = true;
+
+    // Restart game with "R" key
+    if (e.code === "KeyR") {
+        restartGame();
+    }
+});
 window.addEventListener("keyup", (e) => (keys[e.code] = false));
 
 // Game loop
@@ -45,13 +50,13 @@ function gameLoop() {
     // Clear the canvas
     ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Move player left/right
-    if (keys["ArrowRight"]) player.dx = player.speed;
-    else if (keys["ArrowLeft"]) player.dx = -player.speed;
+    // Move player left/right using both Arrow keys and WASD keys
+    if (keys["ArrowRight"] || keys["KeyD"]) player.dx = player.speed;
+    else if (keys["ArrowLeft"] || keys["KeyA"]) player.dx = -player.speed;
     else player.dx = 0;
 
     // Jumping logic
-    if (keys["Space"] && !player.isJumping) {
+    if ((keys["Space"] || keys["KeyW"]) && !player.isJumping) {
         player.dy = player.jumpPower;
         player.isJumping = true;
     }
@@ -77,47 +82,49 @@ function gameLoop() {
         }
     });
 
-    // Prevent falling through the floor
-    if (player.y + player.height > canvas.height) {
-        player.dy = gravity; 
-        player.isJumping = false; 
-        player.y = canvas.height - player.height; 
-    }
+   // Prevent falling through the floor
+   if (player.y + player.height > canvas.height) {
+       player.dy = gravity; 
+       player.isJumping = false; 
+       player.y = canvas.height - player.height; 
+   }
 
-    // Draw the player as a square character
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
+   // Draw the player as a square character
+   ctx.fillStyle = player.color;
+   ctx.fillRect(player.x, player.y, player.width, player.height);
 
-    // Draw platforms
-    platforms.forEach((platform) => {
-        ctx.fillStyle = "green";
-        ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
-    });
+   // Draw platforms
+   platforms.forEach((platform) => {
+       ctx.fillStyle = "green";
+       ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+   });
 
-    // Draw finish line
-    ctx.fillStyle = "red";
-    ctx.fillRect(finishLine.x, finishLine.y, finishLine.width, finishLine.height);
+   // Draw goal at the top
+   ctx.fillStyle = "red";
+   ctx.fillRect(goal.x, goal.y, goal.width, goal.height);
 
-    // Check for win condition
-    if (
-        player.x < finishLine.x + finishLine.width &&
-        player.x + player.width > finishLine.x &&
-        player.y < finishLine.y + finishLine.height &&
-        player.y + player.height > finishLine.y
-      ) {
-        endGame();
-      }
+   // Check for win condition when reaching the goal
+   if (
+       player.x < goal.x + goal.width &&
+       player.x + player.width > goal.x &&
+       player.y < goal.y + goal.height &&
+       player.y + player.height > goal.y
+     ) {
+       endGame();
+     }
 
-      requestAnimationFrame(gameLoop);
+     requestAnimationFrame(gameLoop);
 }
 
-// Start the game loop and timer function
+// Start game function to show start screen and initialize timer.
 function startGame() {
+   document.getElementById("startScreen").classList.add("hidden");
+   document.getElementById("gameCanvas").classList.remove("hidden");
    startTime = Date.now();
    gameLoop();
 }
 
-// End game function to show time taken and restart button
+// End game function to show time taken and restart button.
 function endGame() {
    const endTime = Date.now();
    const timeTaken = Math.floor((endTime - startTime) / 1000);
@@ -126,10 +133,17 @@ function endGame() {
    cancelAnimationFrame(requestAnimationFrame(gameLoop));
 }
 
-// Restart button functionality
+// Restart button functionality.
 document.getElementById("restartButton").addEventListener("click", () => {
-   location.reload(); // Reload the page to restart the game.
+   restartGame();
 });
 
-// Start the game when the page loads.
-startGame();
+// Start button functionality.
+document.getElementById("startButton").addEventListener("click", () => {
+   startGame();
+});
+
+// Function to restart the game.
+function restartGame() {
+   location.reload(); // Reload the page to restart the game.
+}
